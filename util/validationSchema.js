@@ -25,7 +25,22 @@ const updateSkillSchema = Joi.object({
   ),
 });
 
+const userSchema = Joi.object({
+  aws_email: Joi.string().max(255).email().required(),
+  password: Joi.string().max(255).min(8).required(),
+  last_name: Joi.string().max(45).required(),
+  first_name: Joi.string().max(45).required(),
+  dev: Joi.string().max(45).required(),
+});
+
+const loginSchema = Joi.object({
+  aws_email: Joi.string().max(255).email().required(),
+  password: Joi.string().max(255).required(),
+});
+
 module.exports = {
   skillSchema,
   updateSkillSchema,
+  userSchema,
+  loginSchema,
 };

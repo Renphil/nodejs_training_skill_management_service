@@ -9,6 +9,9 @@ exports.errorHandler = (error, cb) => {
       case ERRORS.REQUEST_ERROR:
         errorCode = 400;
         break;
+      case ERRORS.UNAUTHORIZED:
+        errorCode = 401;
+        break;
       case ERRORS.NOT_FOUND_ERROR:
         errorCode = 404;
         break;

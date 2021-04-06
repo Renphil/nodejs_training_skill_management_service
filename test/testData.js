@@ -12,3 +12,11 @@ exports.testData = {
     skill_id: 1,
   },
 };
+
+exports.userTestData = {
+  aws_email: 'renphil.balantin@awsys-i.com',
+  password: 'password',
+  last_name: 'Balantin',
+  first_name: 'Renphil',
+  dev: 'B',
+};

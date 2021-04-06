@@ -1,10 +1,13 @@
 'use strict';
+
 // Load the module dependencies
-const path = require('path'),
-  express = require('express'),
-  logger = require(path.resolve('middleware/logging/logger')),
-  swaggerDocs = require(path.resolve('middleware/jsdocs/swagger')),
-  swaggerUi = require('swagger-ui-express');
+const path = require('path');
+const express = require('express');
+const logger = require(path.resolve('middleware/logging/logger'));
+const swaggerDocs = require(path.resolve('middleware/jsdocs/swagger'));
+const passportConfig = require(path.resolve('middleware/passport/passport'));
+const swaggerUi = require('swagger-ui-express');
+const passport = require('passport');
 
 // Define the Express configuration method
 module.exports = function () {
@@ -18,6 +21,11 @@ module.exports = function () {
   } else if (process.env.NODE_ENV === 'production') {
     app.use(compress());
   }
+
+  //Passport
+  app.use(passport.initialize());
+  app.use(passport.session());
+  passportConfig(passport);
 
   // Routing log directory
   app.use('/log', express.static(path.resolve('log')));
