@@ -12,7 +12,7 @@ module.exports = {
   },
   jwt: {
     secretKey: 'qawsedrftgyhujikolp;@:',
-    expire: 30,
+    expire: 60 * 60 * 24,
   },
   port: 3001,
   modelFlag: false,

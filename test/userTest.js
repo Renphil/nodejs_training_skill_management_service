@@ -52,7 +52,7 @@ describe('User API', function () {
         done();
       });
 
-      it('Should be not able to register user.', (done) => {
+      it('Should not be able to register user.', (done) => {
         chai
           .request(app)
           .post('/api/v1/aws-training-management-system/user/register')
@@ -77,6 +77,9 @@ describe('User API', function () {
           {
             aws_email: userTestData.aws_email,
             password: await bcrypt.hash(userTestData.password, 10),
+            last_name: userTestData.last_name,
+            first_name: userTestData.first_name,
+            dev: userTestData.dev,
           },
         ]);
       });
@@ -110,15 +113,17 @@ describe('User API', function () {
             aws_email: userTestData.aws_email,
             password: 'password',
           })
-          .end((err, response) => {
+          .then((response) => {
+            const { bearerToken } = response.body;
             chai
               .request(app)
               .get('/api/v1/aws-training-management-system/user')
-              .set('Authorization', response.body)
+              .set('Authorization', bearerToken)
               .end((err, res) => {
                 const responseBody = JSON.stringify(res.body);
-                console.log(responseBody);
-                responseBody.should.be.eql(responseBody);
+
+                const { password, ...user } = userTestData;
+                responseBody.should.be.eql(JSON.stringify(user));
                 response.should.have.status(200);
                 done();
               });
@@ -127,37 +132,72 @@ describe('User API', function () {
     });
 
     describe('login with wrong credentials', () => {
-      beforeEach(async () => {
-        sinon.stub(userModel, 'getUserByEmail').resolves([
-          {
-            aws_email: userTestData.aws_email,
-            password: await bcrypt.hash(userTestData.password, 10),
-          },
-        ]);
-      });
+      describe('wrong email', () => {
+        beforeEach(async () => {
+          sinon.stub(userModel, 'getUserByEmail').resolves([]);
+        });
 
-      afterEach((done) => {
-        sinon.restore();
-        done();
-      });
+        afterEach((done) => {
+          sinon.restore();
+          done();
+        });
 
-      it('Should not be able to login user.', (done) => {
-        chai
-          .request(app)
-          .post('/api/v1/aws-training-management-system/user/login')
-          .send({
-            aws_email: userTestData.aws_email,
-            password: 'wrongpassword',
-          })
-          .end((err, response) => {
-            const expected = JSON.stringify({
-              error_message: `invalid username/password`,
+        it('Should not be able to login user.', (done) => {
+          chai
+            .request(app)
+            .post('/api/v1/aws-training-management-system/user/login')
+            .send({
+              aws_email: userTestData.aws_email,
+              password: 'wrongpassword',
+            })
+            .end((err, response) => {
+              const expected = JSON.stringify({
+                error_message: `invalid username/password`,
+              });
+              const responseBody = JSON.stringify(response.body);
+              responseBody.should.be.eql(expected);
+              response.should.have.status(400);
+              done();
             });
-            const responseBody = JSON.stringify(response.body);
-            responseBody.should.be.eql(expected);
-            response.should.have.status(400);
-            done();
-          });
+        });
+      });
+
+      describe('wrong password', () => {
+        beforeEach(async () => {
+          sinon.stub(userModel, 'getUserByEmail').resolves([
+            {
+              aws_email: userTestData.aws_email,
+              password: await bcrypt.hash(userTestData.password, 10),
+              last_name: userTestData.last_name,
+              first_name: userTestData.first_name,
+              dev: userTestData.dev,
+            },
+          ]);
+        });
+
+        afterEach((done) => {
+          sinon.restore();
+          done();
+        });
+
+        it('Should not be able to login user.', (done) => {
+          chai
+            .request(app)
+            .post('/api/v1/aws-training-management-system/user/login')
+            .send({
+              aws_email: userTestData.aws_email,
+              password: 'wrongpassword',
+            })
+            .end((err, response) => {
+              const expected = JSON.stringify({
+                error_message: `invalid username/password`,
+              });
+              const responseBody = JSON.stringify(response.body);
+              responseBody.should.be.eql(expected);
+              response.should.have.status(400);
+              done();
+            });
+        });
       });
     });
 
@@ -188,6 +228,53 @@ describe('User API', function () {
             responseBody.should.be.eql(expected);
             response.should.have.status(422);
             done();
+          });
+      });
+    });
+  });
+
+  describe('logout user', () => {
+    describe('successfull logout', () => {
+      beforeEach(async () => {
+        sinon.stub(userModel, 'getUserByEmail').resolves([
+          {
+            aws_email: userTestData.aws_email,
+            password: await bcrypt.hash(userTestData.password, 10),
+            last_name: userTestData.last_name,
+            first_name: userTestData.first_name,
+            dev: userTestData.dev,
+          },
+        ]);
+      });
+
+      afterEach((done) => {
+        sinon.restore();
+        done();
+      });
+
+      it('Should be able to logout user.', (done) => {
+        chai
+          .request(app)
+          .post('/api/v1/aws-training-management-system/user/login')
+          .send({
+            aws_email: userTestData.aws_email,
+            password: 'password',
+          })
+          .then((response) => {
+            const { bearerToken } = response.body;
+            chai
+              .request(app)
+              .get('/api/v1/aws-training-management-system/user/logout')
+              .set('Authorization', bearerToken)
+              .end((err, res) => {
+                const expected = JSON.stringify({
+                  message: `User logged out`,
+                });
+                const responseBody = JSON.stringify(res.body);
+                responseBody.should.be.eql(expected);
+                response.should.have.status(200);
+                done();
+              });
           });
       });
     });

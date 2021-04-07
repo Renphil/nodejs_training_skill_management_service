@@ -96,6 +96,10 @@ module.exports = function (app) {
    *       description: 2.) return { error_message }
    *       examples:
    *         application/json: { "error_message": "incorrect email/password" }
+   *     422:
+   *       description: 2.) return { error_message }
+   *       examples:
+   *         application/json: { "error_message": "\"aws_email\" is required" }
    *     503:
    *       description: 3.) return { error_message }
    *       examples:

@@ -65,7 +65,6 @@ exports.getUser = async (req, res) => {
     }
     res.status(200).json(req.user);
   } catch (err) {
-    console.log(err);
     errorHandling(err, (status_code, error_message) => {
       return res.status(status_code).json({ error_message: error_message });
     });

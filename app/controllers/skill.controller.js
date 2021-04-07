@@ -21,12 +21,7 @@ exports.getSkillBySkillId = async (req, res) => {
     }
 
     const references = await referenceModel.getReferenceBySkillId(skill_id);
-    if (references.length === 0) {
-      throwError(
-        ERRORS.RESOURCE_ERROR,
-        `No reference found for skill with skill_id of ${skill_id}`
-      );
-    }
+
     skillDbResult[0].references = references;
     return res.status(200).json(skillDbResult[0]);
   } catch (err) {
@@ -49,13 +44,9 @@ exports.getSkillAll = async (req, res) => {
           const skill_refs = await referenceModel.getReferenceBySkillId(
             skillid
           );
-          if (skill_refs.length === 0) {
-            throwError(
-              ERRORS.RESOURCE_ERROR,
-              `No reference found for skill with skill_id of ${skillid}`
-            );
-          }
+
           allSkills.push({ ...skills[index], references: skill_refs });
+
           if (skills.length === allSkills.length) {
             return res.status(200).json(allSkills);
           }
